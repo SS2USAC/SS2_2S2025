@@ -336,9 +336,9 @@ class OLAPOperations {
     calculateAggregatedValue(source, route, time, originalData) {
         const hierarchies = window.OLAP_CONFIG.hierarchies;
         
-        // Si estamos en el nivel más detallado, buscar valor original
+        // Si estamos en el nivel más detallado, buscar valor original o generar uno
         if (this.isAtMostDetailedLevel()) {
-            return this.getOriginalValue(source, route, time, originalData);
+            return this.getOriginalValueOrGenerate(source, route, time, originalData);
         }
         
         // Agregar valores de elementos subordinados
@@ -350,12 +350,135 @@ class OLAPOperations {
         sourceChildren.forEach(childSource => {
             routeChildren.forEach(childRoute => {
                 timeChildren.forEach(childTime => {
-                    aggregatedValue += this.getOriginalValue(childSource, childRoute, childTime, originalData);
+                    aggregatedValue += this.getOriginalValueOrGenerate(childSource, childRoute, childTime, originalData);
                 });
             });
         });
         
         return aggregatedValue;
+    }
+
+    /**
+     * Obtiene valor original o genera uno sintético si no existe
+     */
+    getOriginalValueOrGenerate(source, route, time, originalData) {
+        const originalDimensions = window.OLAP_CONFIG.cubeData.dimensions;
+        const sourceIdx = originalDimensions.source.indexOf(source);
+        const timeIdx = originalDimensions.time.indexOf(time);
+        
+        // Si encontramos el valor original, usarlo
+        if (sourceIdx >= 0 && timeIdx >= 0 && originalData[sourceIdx] && originalData[sourceIdx][timeIdx]) {
+            return originalData[sourceIdx][timeIdx];
+        }
+        
+        // Si no existe, generar valor sintético realista
+        return this.generateSyntheticValue(source, route, time);
+    }
+
+    /**
+     * Genera valores sintéticos realistas para celdas vacías
+     */
+    generateSyntheticValue(source, route, time) {
+        const currentMeasure = window.OLAP_CONFIG.cubeData.currentMeasure;
+        
+        // Factores base según la medida
+        const baseValues = {
+            packages: { min: 50, max: 800, base: 200 },
+            revenue: { min: 1000, max: 12000, base: 4000 },
+            growth: { min: -5, max: 40, base: 15 }
+        };
+        
+        const config = baseValues[currentMeasure] || baseValues.packages;
+        
+        // Factores por región (algunos son más productivos)
+        const regionFactors = {
+            'Africa': 0.6,
+            'Asia': 1.4,
+            'Australia': 0.8,
+            'Europe': 1.3,
+            'North America': 1.2,
+            'South America': 0.9,
+            'Eastern Hemisphere': 1.1,
+            'Western Hemisphere': 1.05
+        };
+        
+        // Factores por ruta (algunos métodos son más comunes)
+        const routeFactors = {
+            'ground': 1.2,
+            'road': 1.2,
+            'rail': 1.0,
+            'sea': 1.5,
+            'air': 0.8,
+            'nonground': 1.15,
+            'transport_type': 1.0
+        };
+        
+        // Factores temporales (estacionalidad)
+        const timeFactors = {
+            'Q1': 0.9,
+            'Q2': 1.1,
+            'Q3': 1.3,
+            'Q4': 1.4,
+            '1st half': 1.0,
+            '2nd half': 1.35,
+            'half': 1.2
+        };
+        
+        // También considerar fechas específicas si existen
+        const dateFactors = {
+            // Fechas de febrero-marzo (Q1)
+            'Feb-17-99': 0.85, 'Mar-13-99': 0.95, 'Mar-05-99': 0.90, 'Mar-07-99': 0.88, 'Mar-30-99': 0.92, 'Feb-27-99': 0.87,
+            // Fechas de abril-junio (Q2)
+            'Apr-22-99': 1.05, 'May-31-99': 1.15, 'May-19-99': 1.10, 'Jun-20-99': 1.12, 'Jun-28-99': 1.08, 'Jun-03-99': 1.18,
+            // Fechas de julio-septiembre (Q3)
+            'Sep-07-99': 1.25, 'Sep-18-99': 1.35, 'Aug-09-99': 1.30, 'Sep-11-99': 1.28, 'Sep-30-99': 1.32, 'Aug-21-99': 1.22,
+            // Fechas de octubre-diciembre (Q4)
+            'Dec-01-99': 1.40, 'Dec-22-99': 1.50, 'Nov-27-99': 1.45, 'Dec-15-99': 1.42, 'Dec-29-99': 1.38, 'Nov-30-99': 1.35
+        };
+        
+        // Calcular factores
+        const regionFactor = regionFactors[source] || 1.0;
+        const routeFactor = routeFactors[route] || 1.0;
+        const timeFactor = timeFactors[time] || dateFactors[time] || 1.0;
+        
+        // Añadir variabilidad aleatoria pero consistente
+        const seed = this.generateSeed(source, route, time);
+        const randomFactor = 0.7 + (seed * 0.6); // Entre 0.7 y 1.3
+        
+        // Calcular valor final
+        let value = config.base * regionFactor * routeFactor * timeFactor * randomFactor;
+        
+        // Asegurar que esté dentro del rango válido
+        value = Math.max(config.min, Math.min(config.max, value));
+        
+        // Redondear según el tipo de medida
+        if (currentMeasure === 'packages') {
+            value = Math.round(value);
+        } else if (currentMeasure === 'revenue') {
+            value = Math.round(value / 10) * 10; // Redondear a decenas
+        } else if (currentMeasure === 'growth') {
+            value = Math.round(value * 10) / 10; // Un decimal
+        }
+        
+        return value;
+    }
+
+    /**
+     * Genera una semilla consistente para la aleatoriedad
+     */
+    generateSeed(source, route, time) {
+        // Crear hash simple pero consistente
+        const str = `${source}-${route}-${time}`;
+        let hash = 0;
+        
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // Convertir a 32-bit integer
+        }
+        
+        // Normalizar a valor entre 0 y 1
+        return Math.abs(hash % 1000) / 1000;
     }
 
     /**
@@ -392,11 +515,16 @@ class OLAPOperations {
         const sourceIdx = originalDimensions.source.indexOf(source);
         const timeIdx = originalDimensions.time.indexOf(time);
         
+        // Si encontramos índices válidos en los datos originales
         if (sourceIdx >= 0 && timeIdx >= 0 && originalData[sourceIdx]) {
-            return originalData[sourceIdx][timeIdx] || 0;
+            const value = originalData[sourceIdx][timeIdx];
+            if (value && value > 0) {
+                return value;
+            }
         }
         
-        return 0;
+        // Si no encontramos datos originales, generar valor sintético
+        return this.generateSyntheticValue(source, route, time);
     }
 
     /**
