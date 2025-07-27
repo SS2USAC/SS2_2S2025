@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cubo OLAP Interactivo</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="loading">
+        <div class="spinner"></div>
+    </div>
+
+    <div id="container">
+        <div id="canvas-container"></div>
+        
+        <!-- Panel de control principal -->
+        <div id="control-panel">
+            <!-- Sección de operaciones OLAP -->
+            <div class="panel-section">
+                <div class="panel-title">Operaciones OLAP</div>
+                
+                <div class="control-group">
+                    <label class="control-label">Slice / Corte</label>
+                    <button class="control-button" id="slice-x">Corte en X</button>
+                    <button class="control-button" id="slice-y">Corte en Y</button>
+                    <button class="control-button" id="slice-z">Corte en Z</button>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">Dice / Segmentación</label>
+                    <button class="control-button" id="dice-operation">Aplicar Dice</button>
+                    <button class="control-button" id="reset-dice">Resetear Dice</button>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">Drill Operations</label>
+                    <button class="control-button" id="drill-down">Drill Down</button>
+                    <button class="control-button" id="drill-up">Drill Up</button>
+                    <button class="control-button" id="drill-through">Drill Through</button>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">Pivot / Rotación</label>
+                    <button class="control-button" id="pivot-xy">Pivot X-Y</button>
+                    <button class="control-button" id="pivot-xz">Pivot X-Z</button>
+                    <button class="control-button" id="pivot-yz">Pivot Y-Z</button>
+                </div>
+            </div>
+
+            <!-- Sección de visualización -->
+            <div class="panel-section">
+                <div class="panel-title">Visualización</div>
+                
+                <div class="control-group">
+                    <label class="control-label">Transparencia del Cubo</label>
+                    <div class="slider-container">
+                        <input type="range" class="slider" id="cube-opacity" min="0.1" max="1" value="0.7" step="0.1">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">Mostrar/Ocultar</label>
+                    <button class="control-button" id="toggle-wireframe">Wireframe</button>
+                    <button class="control-button" id="toggle-labels">Etiquetas</button>
+                    <button class="control-button" id="toggle-grid">Grid Helper</button>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">Animación</label>
+                    <button class="control-button" id="toggle-rotation">Auto Rotación</button>
+                    <button class="control-button" id="reset-camera">Reset Cámara</button>
+                </div>
+            </div>
+
+            <!-- Sección de datos -->
+            <div class="panel-section">
+                <div class="panel-title">Datos del Cubo</div>
+                
+                <div class="control-group">
+                    <label class="control-label">Dimensiones Activas</label>
+                    <button class="control-button active" id="dim-source">Source</button>
+                    <button class="control-button active" id="dim-route">Route</button>
+                    <button class="control-button active" id="dim-time">Time</button>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">Medidas</label>
+                    <button class="control-button active" id="measure-packages">Packages</button>
+                    <button class="control-button" id="measure-revenue">Revenue</button>
+                    <button class="control-button" id="measure-growth">Growth</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel de información -->
+        <div id="info-panel">
+            <div class="info-title">Información del Cubo</div>
+            <div class="info-content" id="cube-info">
+                Dimensiones: 3 (Source, Route, Time)<br>
+                Celdas Visibles: 64<br>
+                Operación Actual: Ninguna<br>
+                Nivel de Detalle: Resumen
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts de Three.js desde CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- Scripts personalizados -->
+    <script src="script/config.js"></script>
+    <script src="script/olap-renderer.js"></script>
+    <script src="script/olap-operations.js"></script>
+    <script src="script/olap-controls.js"></script>
+    <script src="script/main.js"></script>
+</body>
+</html>
