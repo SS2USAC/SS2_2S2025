@@ -1,0 +1,1 @@
+[Cubo](https://ss2usac.github.io/SS2_2S2025A/S2/cubeview/index.html)
