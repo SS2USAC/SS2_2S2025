@@ -8,7 +8,7 @@
 Se incluye un ejercicio práctico donde se construye un cubo multidimensional utilizando **una página web***, partiendo de un conjunto de datos de un ejemplo plano. En este ejercicio se aplican operaciones como **tablas dinámicas, medidas, filtros y visualización en 3D**, lo que permite explorar las capacidades básicas del análisis OLAP.
 
 Accede a la carpeta del ejemplo:  
-[Cubo 3D](https://github.com/usuario/repositorio/ejemplo-cubo-excel)
+[Cubo 3D](https://github.com/SS2USAC/SS2_2S2025A/tree/main/S2/cubeview)
 
 ---
 
@@ -23,4 +23,4 @@ Este apartado incluye los scripts SQL y diagramas correspondientes a tres modelo
 Estos modelos se utilizaron como base para el análisis del caso “Distribuidora Aurora”, permitiendo comprender las implicaciones prácticas de cada enfoque.
 
 Accede a la carpeta de modelos de negocio:  
-[Modelos multidimensionales](https://github.com/usuario/repositorio/modelos-dimensionales)
+[Modelos multidimensionales](https://github.com/SS2USAC/SS2_2S2025A/tree/main/S2/BImodel)
