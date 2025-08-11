@@ -1,0 +1,40 @@
+## Visual Studio
+.vs/
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Paquetes NuGet
+*.nupkg
+packages/
+*.snupkg
+
+# Archivos de compilación
+*.log
+*.tlog
+*.cache
+*.pdb
+
+# Archivos de publicación
+publish/
+
+# Carpetas temporales
+[Tt]emp/
+*.tmp
+~$*
+
+# Archivos de backup
+*.bak
+*.backup
+
+# Otros
+_ReSharper*/
+*.resharper
+*.DotSettings.user
